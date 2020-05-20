@@ -3,12 +3,13 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const axios = require("axios");
 const auth = require("./middleware");
-const app = express();
 
-const PORT = 5000;
+const awsServerlessExpressMiddleware = require("aws-serverless-express/middleware");
+const app = express();
 
 app.use(cors());
 app.use(express.json({ extended: false }));
+app.use(awsServerlessExpressMiddleware.eventContext());
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
@@ -23,7 +24,7 @@ app.post("/login", (req, res) => {
 
   jwt.sign(
     payload,
-    "teststring",
+    process.env.JWT_SECRET,
     { expiresIn: 24 * 60 * 60 * 30 },
     (err, token) => {
       if (err) {
@@ -46,6 +47,4 @@ app.get("/data", auth, (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is up, listening on port: ${PORT}`);
-});
+module.exports = app;

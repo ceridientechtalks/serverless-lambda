@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ message: "no token, auth failed" });
   }
 
-  jwt.verify(token, "teststring", function (err, decoded) {
+  jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
     if (err) {
       console.log(err.name, err.message, err.expiredAt);
 
