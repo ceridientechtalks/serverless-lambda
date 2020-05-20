@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template for demo
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  DemoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v2
+      Cors:
+        AllowMethods: '''DELETE,GET,HEAD,OPTIONS,POST,PUT'''
+        AllowHeaders: '''*'''
+        AllowOrigin: '''*'''
+  DemoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: DemoFunction
+      Handler: lambda.lambdaHandler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          JWT_SECRET: teststring
+      Events:
+        Login:
+          Type: Api
+          Properties:
+            Path: /login
+            Method: post
+            RestApiId:
+              Ref: DemoApi
+        Data:
+          Type: Api
+          Properties:
+            Path: /data
+            Method: get
+            RestApiId:
+              Ref: DemoApi
+Outputs:
+  Login:
+    Value:
+      Fn::Sub: https://${DemoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/login
+  Data:
+    Value:
+      Fn::Sub: https://${DemoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/data
+  DemoFunction:
+    Description: Demo Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - DemoFunction
+      - Arn
+  DemoFunctionIamRole:
+    Description: Implicit IAM Role created for Demo function
+    Value:
+      Fn::GetAtt:
+      - DemoFunctionRole
+      - Arn
